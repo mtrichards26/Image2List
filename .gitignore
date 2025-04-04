@@ -1,0 +1,57 @@
+# Xcode
+.DS_Store
+xcuserdata/
+*.xcscmblueprint
+*.xcworkspace
+*.xccheckout
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+*.lock
+*.xcconfig
+
+# Carthage
+Carthage/
+
+# Derived Data
+DerivedData/
+
+# Archive files
+*.ipa
+*.xcarchive
+
+# macOS Files
+*.DS_Store
+*.swp
+*.swo
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Xcode Server
+integration-*
+
+# Playgrounds
+playground.xcworkspace/
+playground.xcodeproj/
+Sources/
+Timeline.playground
+
+# Editor backups
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# User-specific settings
+*.mode1v3
+*.pbxuser
+
