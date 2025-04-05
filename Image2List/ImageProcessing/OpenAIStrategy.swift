@@ -7,6 +7,14 @@
 import SwiftUI
 import Vision
 
+// OpenAI Configuration
+struct OpenAIConfig {
+    static let apiKey = "YOUR_API_KEY"
+    static let endpoint = "https://api.openai.com/v1/chat/completions"
+    static let availableModels = ["gpt-4o-mini", "gpt-4o"]
+    static let defaultModel = "gpt-4o-mini"
+}    
+
 class OpenAIStrategy: ImageProcessingStrategy {
     private let apiKey: String
     private let endpoint: String
@@ -19,7 +27,7 @@ class OpenAIStrategy: ImageProcessingStrategy {
     }
     
     func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [String], error: String?) {
-        progress("Preparing image for OpenAI...")
+        progress("Preparing image for ChatGPT/OpenAI...")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             return ([], "Failed to convert image to JPEG format")
         }
@@ -61,7 +69,7 @@ class OpenAIStrategy: ImageProcessingStrategy {
         request.httpBody = jsonData
         
         do {
-            progress("Sending image to OpenAI...")
+            progress("Sending image to ChatGPT/OpenAI...")
             let (data, response) = try await URLSession.shared.data(for: request)
             
             if let httpResponse = response as? HTTPURLResponse {

@@ -8,25 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		1234567890ABCDE1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE2 /* ContentView.swift */; };
-		1234567890ABCDE3 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE4 /* CameraView.swift */; };
-		1234567890ABCDE5 /* GroceryVocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE6 /* GroceryVocabulary.swift */; };
 		1234567890ABCDE9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDEA /* SettingsView.swift */; };
 		1234567890ABCDEB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDEC /* Assets.xcassets */; };
 		1234567890ABCDEF /* Image2ListApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE0 /* Image2ListApp.swift */; };
+		310319962DA1EC2700F8DC32 /* Checklist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310319952DA1EC2700F8DC32 /* Checklist.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1234567890ABCDE0 /* Image2ListApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image2ListApp.swift; sourceTree = "<group>"; };
 		1234567890ABCDE2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		1234567890ABCDE4 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
-		1234567890ABCDE6 /* GroceryVocabulary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryVocabulary.swift; sourceTree = "<group>"; };
 		1234567890ABCDEA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1234567890ABCDEC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1234567890ABCDED /* GrocerySnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrocerySnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1234567890ABCDEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		310319952DA1EC2700F8DC32 /* Checklist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checklist.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		310319922DA1EBCA00F8DC32 /* ImagePicker */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ImagePicker; sourceTree = "<group>"; };
 		3103E0022DA0B21E0072DB1E /* ImageProcessing */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ImageProcessing; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -52,11 +51,11 @@
 		1234567890ABCDF1 /* Image2List */ = {
 			isa = PBXGroup;
 			children = (
+				310319922DA1EBCA00F8DC32 /* ImagePicker */,
 				3103E0022DA0B21E0072DB1E /* ImageProcessing */,
 				1234567890ABCDE0 /* Image2ListApp.swift */,
 				1234567890ABCDE2 /* ContentView.swift */,
-				1234567890ABCDE4 /* CameraView.swift */,
-				1234567890ABCDE6 /* GroceryVocabulary.swift */,
+				310319952DA1EC2700F8DC32 /* Checklist.swift */,
 				1234567890ABCDEA /* SettingsView.swift */,
 				1234567890ABCDEC /* Assets.xcassets */,
 				1234567890ABCDEE /* Info.plist */,
@@ -88,6 +87,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				310319922DA1EBCA00F8DC32 /* ImagePicker */,
 				3103E0022DA0B21E0072DB1E /* ImageProcessing */,
 			);
 			name = Image2List;
@@ -145,8 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1234567890ABCDE1 /* ContentView.swift in Sources */,
-				1234567890ABCDE3 /* CameraView.swift in Sources */,
-				1234567890ABCDE5 /* GroceryVocabulary.swift in Sources */,
+				310319962DA1EC2700F8DC32 /* Checklist.swift in Sources */,
 				1234567890ABCDE9 /* SettingsView.swift in Sources */,
 				1234567890ABCDEF /* Image2ListApp.swift in Sources */,
 			);
