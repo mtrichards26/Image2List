@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1234567890ABCDEF /* Image2ListApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE0 /* Image2ListApp.swift */; };
 		1234567890ABCDE1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE2 /* ContentView.swift */; };
 		1234567890ABCDE3 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE4 /* CameraView.swift */; };
 		1234567890ABCDE5 /* GroceryVocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE6 /* GroceryVocabulary.swift */; };
 		1234567890ABCDE7 /* ImageProcessingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE8 /* ImageProcessingStrategy.swift */; };
 		1234567890ABCDE9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDEA /* SettingsView.swift */; };
 		1234567890ABCDEB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDEC /* Assets.xcassets */; };
+		1234567890ABCDEF /* Image2ListApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1234567890ABCDE0 /* Image2ListApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,7 +24,7 @@
 		1234567890ABCDE8 /* ImageProcessingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessingStrategy.swift; sourceTree = "<group>"; };
 		1234567890ABCDEA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1234567890ABCDEC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		1234567890ABCDED /* Image2List.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Image2List.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1234567890ABCDED /* Image2List.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Image2List.app; path = GrocerySnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1234567890ABCDEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -155,8 +155,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -219,8 +219,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
