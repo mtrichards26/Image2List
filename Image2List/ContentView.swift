@@ -271,6 +271,7 @@ struct ContentView: View {
             }
             .background(Color(red: 0.95, green: 0.97, blue: 0.95))
             .navigationTitle("GrocerySnap")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(
                 Color(red: 0.4, green: 0.7, blue: 0.4),
@@ -326,6 +327,7 @@ struct ContentView: View {
                 Text(error)
             }
         }
+        .navigationViewStyle(.stack)
     }
     
     private func processImage(_ image: UIImage) async {
