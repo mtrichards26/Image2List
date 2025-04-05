@@ -1,14 +1,5 @@
 import SwiftUI
 import PhotosUI
-import Vision
-
-// OpenAI Configuration
-struct OpenAIConfig {
-    static let apiKey = "YOUR_API_KEY" // Replace with your actual API key
-    static let endpoint = "https://api.openai.com/v1/chat/completions"
-    static let availableModels = ["gpt-4o-mini", "gpt-4o"]
-    static let defaultModel = "gpt-4o-mini"
-}
 
 struct ContentView: View {
     @State private var selectedImage: UIImage?
@@ -32,7 +23,6 @@ struct ContentView: View {
     @State private var recognizedItems: [String] = []
     @State private var isProcessing = false
     @State private var processingMessage = ""
-    @AppStorage("openaiApiKey") private var openaiApiKey = ""
     @AppStorage("openaiEndpoint") private var openaiEndpoint = ""
     @AppStorage("customWords") private var customWordsString = ""
     @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
@@ -313,7 +303,10 @@ struct ContentView: View {
                     isPresented: $isShowingSettings,
                     useOpenAI: $useOpenAI,
                     openAIKey: $openAIKey,
-                    keepScreenOn: $isScreenLockDisabled
+                    keepScreenOn: $isScreenLockDisabled,
+                    extractionType: $extractionType,
+                    googleApiKey: $googleApiKey,
+                    openaiModel: $openaiModel
                 )
             }
             .alert("Error", isPresented: $showingError, presenting: errorMessage) { _ in
@@ -349,150 +342,6 @@ struct ContentView: View {
                 }
             }
             isProcessing = false
-        }
-    }
-}
-
-@available(iOS 16.0, *)
-struct PhotosPickerView: View {
-    @State private var selectedItem: PhotosPickerItem?
-    @Binding var selectedImage: UIImage?
-    @State private var isProcessing = false
-    let onImageSelected: (UIImage) async -> Void
-    
-    var body: some View {
-        PhotosPicker(selection: $selectedItem,
-                    matching: .images) {
-            Label("Choose Photo", systemImage: "photo.on.rectangle")
-        }
-        .buttonStyle(.bordered)
-        .onChange(of: selectedItem) { oldItem, newItem in
-            Task {
-                if let newItem {
-                    do {
-                        if let data = try await newItem.loadTransferable(type: Data.self),
-                           let image = UIImage(data: data) {
-                            await MainActor.run {
-                                selectedImage = image
-                                isProcessing = true
-                            }
-                            
-                            // Process the image
-                            await onImageSelected(image)
-                            
-                            await MainActor.run {
-                                isProcessing = false
-                            }
-                        }
-                    } catch {
-                        print("Error loading image: \(error)")
-                        await MainActor.run {
-                            isProcessing = false
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct ChecklistItem: Identifiable, Comparable {
-    let id = UUID()
-    var text: String
-    var isChecked: Bool = false
-    let originalIndex: Int
-    
-    static func < (lhs: ChecklistItem, rhs: ChecklistItem) -> Bool {
-        if lhs.isChecked == rhs.isChecked {
-            return lhs.originalIndex < rhs.originalIndex
-        }
-        return !lhs.isChecked
-    }
-}
-
-struct ChecklistItemRow: View {
-    @Binding var item: ChecklistItem
-    let onCheck: () -> Void
-    let onDelete: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 22))
-                .foregroundColor(item.isChecked ? Color(red: 0.4, green: 0.7, blue: 0.4) : Color(red: 0.6, green: 0.6, blue: 0.6))
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        item.isChecked.toggle()
-                        onCheck()
-                    }
-                }
-            
-            Text(item.text)
-                .font(.body)
-                .foregroundColor(item.isChecked ? Color(red: 0.6, green: 0.6, blue: 0.6) : Color(red: 0.2, green: 0.2, blue: 0.2))
-                .strikethrough(item.isChecked)
-            
-            Spacer()
-            
-            Image(systemName: "line.3.horizontal")
-                .font(.system(size: 16))
-                .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
-                .padding(.trailing, 4)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(red: 0.95, green: 0.97, blue: 0.95))
-        .contentShape(Rectangle())
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                withAnimation {
-                    onDelete()
-                }
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            .tint(Color(red: 0.7, green: 0.3, blue: 0.3))
-        }
-    }
-}
-
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
-    @Environment(\.presentationMode) private var presentationMode
-    let onImageSelected: (UIImage) async -> Void
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePicker
-        
-        init(_ parent: ImagePicker) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.image = image
-                Task {
-                    await parent.onImageSelected(image)
-                }
-            }
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
         }
     }
 }

@@ -5,9 +5,9 @@ struct SettingsView: View {
     @Binding var useOpenAI: Bool
     @Binding var openAIKey: String
     @Binding var keepScreenOn: Bool
-    @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
-    @AppStorage("extractionType") private var extractionType = ExtractionType.local
-    @AppStorage("googleApiKey") private var googleApiKey = ""
+    @Binding var extractionType: ExtractionType
+    @Binding var googleApiKey: String
+    @Binding var openaiModel: String
     
     @State private var tempOpenAIKey: String = ""
     @State private var showingKeyAlert = false
@@ -23,17 +23,17 @@ struct SettingsView: View {
                     }
                     
                     if extractionType == .openai {
-                        TextField("OpenAI API Key", text: $openAIKey)
+                        SecureField("OpenAI API Key", text: $openAIKey)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
-                        
+                            
                         Picker("Model", selection: $openaiModel) {
                             ForEach(OpenAIConfig.availableModels, id: \.self) { model in
                                 Text(model).tag(model)
                             }
                         }
                     } else if extractionType == .google {
-                        TextField("Google API Key", text: $googleApiKey)
+                        SecureField("Google API Key", text: $googleApiKey)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                     }
@@ -44,9 +44,14 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarItems(trailing: Button("Done") {
-                isPresented = false
-            })
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        isPresented = false
+                    }
+                }
+            }
         }
     }
 } 

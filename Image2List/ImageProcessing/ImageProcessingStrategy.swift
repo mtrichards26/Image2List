@@ -13,7 +13,7 @@ extension ImageProcessingStrategy{
 
 enum ExtractionType: String, CaseIterable {
     case local = "Vision"
-    case openai = "OpenAI"
+    case openai = "Chat GPT/OpenAI"
     case google = "Google AI"
 }
 
