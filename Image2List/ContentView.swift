@@ -38,6 +38,8 @@ struct ContentView: View {
     @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
     @AppStorage("extractionType") private var extractionType = ExtractionType.local
     @AppStorage("googleApiKey") private var googleApiKey = ""
+    @State private var errorMessage: String?
+    @State private var showingError = false
     
     private var customWords: [String] {
         customWordsString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -313,23 +315,37 @@ struct ContentView: View {
                     keepScreenOn: $isScreenLockDisabled
                 )
             }
+            .alert("Error", isPresented: $showingError, presenting: errorMessage) { _ in
+                Button("OK") {
+                    showingError = false
+                }
+                Button("Copy Error") {
+                    UIPasteboard.general.string = errorMessage
+                }
+            } message: { error in
+                Text(error)
+            }
         }
     }
     
     private func processImage(_ image: UIImage) async {
         isProcessing = true
         processingMessage = "Starting image processing..."
+        errorMessage = nil
         
-        let items = await imageProcessor.processImage(image) { message in
+        let result = await imageProcessor.processImage(image) { message in
             processingMessage = message
         }
         
         DispatchQueue.main.async {
-            checklistItems = items.enumerated().map { (index, text) in
-                ChecklistItem(text: text, originalIndex: index)
+            if let error = result.error {
+                errorMessage = error
+                showingError = true
+            } else {
+                checklistItems = result.items.enumerated().map { (index, text) in
+                    ChecklistItem(text: text, originalIndex: index)
+                }
             }
-            recognizedItems = items
-            isShowingImage = false
             isProcessing = false
         }
     }
