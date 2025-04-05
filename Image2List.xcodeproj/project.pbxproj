@@ -75,9 +75,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1234567890ABCDF3 /* GrocerySnap */ = {
+		1234567890ABCDF3 /* Image2List */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1234567890ABCDF4 /* Build configuration list for PBXNativeTarget "GrocerySnap" */;
+			buildConfigurationList = 1234567890ABCDF4 /* Build configuration list for PBXNativeTarget "Image2List" */;
 			buildPhases = (
 				1234567890ABCDF5 /* Frameworks */,
 				1234567890ABCDF6 /* Sources */,
@@ -90,7 +90,7 @@
 			fileSystemSynchronizedGroups = (
 				3103E0022DA0B21E0072DB1E /* ImageProcessing */,
 			);
-			name = GrocerySnap;
+			name = Image2List;
 			productName = Image2List;
 			productReference = 1234567890ABCDED /* GrocerySnap.app */;
 			productType = "com.apple.product-type.application";
@@ -123,7 +123,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1234567890ABCDF3 /* GrocerySnap */,
+				1234567890ABCDF3 /* Image2List */,
 			);
 		};
 /* End PBXProject section */
@@ -345,7 +345,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1234567890ABCDF4 /* Build configuration list for PBXNativeTarget "GrocerySnap" */ = {
+		1234567890ABCDF4 /* Build configuration list for PBXNativeTarget "Image2List" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1234567890ABCDFC /* Debug */,
