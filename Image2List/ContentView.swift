@@ -30,6 +30,7 @@ struct ContentView: View {
     @AppStorage("googleApiKey") private var googleApiKey = ""
     @State private var errorMessage: String?
     @State private var showingError = false
+    @AppStorage("savedChecklistItems") private var savedChecklistItemsData: Data = Data()
     
     private var customWords: [String] {
         customWordsString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -321,6 +322,70 @@ struct ContentView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .onAppear {
+            loadSavedState()
+        }
+        .onChange(of: checklistItems) { _, newItems in
+            saveChecklistItems(newItems)
+        }
+        .onChange(of: selectedImage) { _, newImage in
+            if let image = newImage {
+                saveImage(image)
+            } else {
+                deleteSavedImage()
+            }
+        }
+    }
+    
+    private func loadSavedState() {
+        // Load checklist items
+        if !savedChecklistItemsData.isEmpty {
+            if let decodedItems = try? JSONDecoder().decode([ChecklistItem].self, from: savedChecklistItemsData) {
+                checklistItems = decodedItems
+            }
+        }
+        
+        // Load image
+        if let image = loadSavedImage() {
+            selectedImage = image
+        }
+    }
+    
+    private func saveChecklistItems(_ items: [ChecklistItem]) {
+        if let encodedData = try? JSONEncoder().encode(items) {
+            savedChecklistItemsData = encodedData
+        }
+    }
+    
+    private func saveImage(_ image: UIImage) {
+        if let data = image.jpegData(compressionQuality: 0.8) {
+            let fileManager = FileManager.default
+            if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let fileURL = documentsDirectory.appendingPathComponent("savedImage.jpg")
+                try? data.write(to: fileURL)
+            }
+        }
+    }
+    
+    private func loadSavedImage() -> UIImage? {
+        let fileManager = FileManager.default
+        if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = documentsDirectory.appendingPathComponent("savedImage.jpg")
+            if fileManager.fileExists(atPath: fileURL.path) {
+                if let data = try? Data(contentsOf: fileURL) {
+                    return UIImage(data: data)
+                }
+            }
+        }
+        return nil
+    }
+    
+    private func deleteSavedImage() {
+        let fileManager = FileManager.default
+        if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = documentsDirectory.appendingPathComponent("savedImage.jpg")
+            try? fileManager.removeItem(at: fileURL)
+        }
     }
     
     private func processImage(_ image: UIImage) async {
