@@ -42,6 +42,21 @@ struct SettingsView: View {
                 Section(header: Text("Display")) {
                     Toggle("Keep Screen On", isOn: $keepScreenOn)
                 }
+                
+                Section {
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 4) {
+                            Text("GrocerySnap")
+                                .font(.headline)
+                            Text("Version \(appVersion) (\(buildNumber))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -53,5 +68,13 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+    
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
     }
 } 
