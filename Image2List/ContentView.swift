@@ -263,6 +263,18 @@ struct ContentView: View {
             .background(Color(red: 0.95, green: 0.97, blue: 0.95))
             .navigationTitle("GrocerySnap")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 4) {
+                        Text("GrocerySnap")
+                        if isScreenLockDisabled {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 6, height: 6)
+                        }
+                    }
+                }
+            }
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(
                 Color(red: 0.4, green: 0.7, blue: 0.4),
@@ -271,6 +283,11 @@ struct ContentView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .onChange(of: isScreenLockDisabled) { oldValue, newValue in
                 UIApplication.shared.isIdleTimerDisabled = newValue
+            }
+            .onAppear {
+                // Apply screen lock setting when app launches
+                UIApplication.shared.isIdleTimerDisabled = isScreenLockDisabled
+                loadSavedState()
             }
             .sheet(isPresented: $isCameraPresented) {
                 CameraView(image: $selectedImage, onImageSelected: processImage)
@@ -322,9 +339,6 @@ struct ContentView: View {
             }
         }
         .navigationViewStyle(.stack)
-        .onAppear {
-            loadSavedState()
-        }
         .onChange(of: checklistItems) { _, newItems in
             saveChecklistItems(newItems)
         }
