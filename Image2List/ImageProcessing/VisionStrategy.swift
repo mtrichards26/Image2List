@@ -39,8 +39,7 @@ class VisionStrategy: ImageProcessingStrategy {
             
             progress("Extracting text from image...")
             let items = observations.enumerated().compactMap { (index, observation) -> String? in
-                guard let textObservation = observation as? VNRecognizedTextObservation,
-                      let text = textObservation.topCandidates(1).first?.string else { return nil }
+                guard let text = observation.topCandidates(1).first?.string else { return nil }
                 
                 // Clean up the text while preserving quantities and packaging
                 let cleanedText = cleanText(text)

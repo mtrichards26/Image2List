@@ -7,10 +7,17 @@
 import SwiftUI
 
 struct ChecklistItem: Identifiable, Comparable, Codable {
-    let id = UUID()
+    let id: UUID
     var text: String
     var isChecked: Bool = false
     let originalIndex: Int
+    
+    init(id: UUID = UUID(), text: String, isChecked: Bool = false, originalIndex: Int) {
+        self.id = id
+        self.text = text
+        self.isChecked = isChecked
+        self.originalIndex = originalIndex
+    }
     
     static func < (lhs: ChecklistItem, rhs: ChecklistItem) -> Bool {
         if lhs.isChecked == rhs.isChecked {
