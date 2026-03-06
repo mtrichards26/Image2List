@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var isPresented: Bool
-    @Binding var useOpenAI: Bool
     @Binding var openAIKey: String
     @Binding var keepScreenOn: Bool
     @Binding var extractionType: ExtractionType

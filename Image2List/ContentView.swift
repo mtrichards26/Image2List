@@ -14,16 +14,13 @@ struct ContentView: View {
     @State private var editingItem: ChecklistItem?
     @State private var editingText = ""
     @State private var isShowingSettings = false
-    @AppStorage("useOpenAI") private var useOpenAI = false
     @AppStorage("openAIKey") private var openAIKey = ""
     @AppStorage("keepScreenOn") private var isScreenLockDisabled = false
     @FocusState private var isEditingFocused: Bool
     @State private var isImagePickerPresented = false
     @State private var isCameraPresented = false
-    @State private var recognizedItems: [String] = []
     @State private var isProcessing = false
     @State private var processingMessage = ""
-    @AppStorage("openaiEndpoint") private var openaiEndpoint = ""
     @AppStorage("customWords") private var customWordsString = ""
     @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
     @AppStorage("extractionType") private var extractionType = ExtractionType.local
@@ -319,7 +316,6 @@ struct ContentView: View {
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView(
                     isPresented: $isShowingSettings,
-                    useOpenAI: $useOpenAI,
                     openAIKey: $openAIKey,
                     keepScreenOn: $isScreenLockDisabled,
                     extractionType: $extractionType,
@@ -449,30 +445,5 @@ struct DropViewDelegate: DropDelegate {
     
     func dropUpdated(info: DropInfo) -> DropProposal? {
         return DropProposal(operation: .move)
-    }
-}
-
-
-// Add this extension to help with text field cursor positioning
-extension UITextField {
-    static var current: UITextField? {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            return windowScene.windows.first?.findFirstResponder() as? UITextField
-        }
-        return nil
-    }
-}
-
-extension UIView {
-    func findFirstResponder() -> UIView? {
-        if isFirstResponder {
-            return self
-        }
-        for subview in subviews {
-            if let firstResponder = subview.findFirstResponder() {
-                return firstResponder
-            }
-        }
-        return nil
     }
 }

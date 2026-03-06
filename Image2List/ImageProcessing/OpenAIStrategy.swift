@@ -9,8 +9,6 @@ import Vision
 
 // OpenAI Configuration
 struct OpenAIConfig {
-    static let apiKey = "YOUR_API_KEY"
-    static let endpoint = "https://api.openai.com/v1/chat/completions"
     static let availableModels = ["gpt-4o-mini", "gpt-4o"]
     static let defaultModel = "gpt-4o-mini"
 }    
