@@ -23,10 +23,12 @@ struct ContentView: View {
     @State private var processingMessage = ""
     @AppStorage("customWords") private var customWordsString = ""
     @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
+    @AppStorage("geminiModel") private var geminiModel = GeminiConfig.defaultModel
     @AppStorage("extractionType") private var extractionType = ExtractionType.local
     @AppStorage("googleApiKey") private var googleApiKey = ""
     @State private var errorMessage: String?
     @State private var showingError = false
+    @State private var isShowingClearListConfirmation = false
     @AppStorage("savedChecklistItems") private var savedChecklistItemsData: Data = Data()
     
     private var customWords: [String] {
@@ -40,7 +42,7 @@ struct ContentView: View {
         case .openai:
             return OpenAIStrategy(apiKey: openAIKey, endpoint: "https://api.openai.com/v1/chat/completions", model: openaiModel)
         case .google:
-            return GeminiStrategy(apiKey: googleApiKey)
+            return GeminiStrategy(apiKey: googleApiKey, model: geminiModel)
         }
     }
     
@@ -227,16 +229,24 @@ struct ContentView: View {
                         
                         if selectedImage != nil {
                             Button(action: {
-                                withAnimation {
-                                    self.selectedImage = nil
-                                    checklistItems = []
-                                }
+                                isShowingClearListConfirmation = true
                             }) {
                                 Image(systemName: "trash")
                                     .font(.system(size: 24))
                                     .foregroundColor(Color(red: 0.7, green: 0.3, blue: 0.3))
                                     .padding(12)
                                     .background(Color(red: 0.7, green: 0.3, blue: 0.3).opacity(0.1))
+                            }
+                            .confirmationDialog("Clear List?", isPresented: $isShowingClearListConfirmation) {
+                                Button("Clear List", role: .destructive) {
+                                    withAnimation {
+                                        selectedImage = nil
+                                        checklistItems = []
+                                    }
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            } message: {
+                                Text("This will remove the photo and all list items. This cannot be undone.")
                             }
                         }
                     }
@@ -320,7 +330,8 @@ struct ContentView: View {
                     keepScreenOn: $isScreenLockDisabled,
                     extractionType: $extractionType,
                     googleApiKey: $googleApiKey,
-                    openaiModel: $openaiModel
+                    openaiModel: $openaiModel,
+                    geminiModel: $geminiModel
                 )
             }
             .alert("Error", isPresented: $showingError, presenting: errorMessage) { _ in
@@ -412,9 +423,10 @@ struct ContentView: View {
                 errorMessage = error
                 showingError = true
             } else {
-                checklistItems = result.items.enumerated().map { (index, text) in
-                    ChecklistItem(text: text, originalIndex: index)
+                checklistItems = result.items.enumerated().map { (index, item) in
+                    ChecklistItem(text: titleCasedForList(item.text), originalIndex: index, section: item.section)
                 }
+                checklistItems.sort()
             }
             isProcessing = false
         }

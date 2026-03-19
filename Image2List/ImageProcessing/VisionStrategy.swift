@@ -14,16 +14,15 @@ class VisionStrategy: ImageProcessingStrategy {
         self.customWords = customWords
     }
     
-    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [String], error: String?) {
+    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [GroceryItemResult], error: String?) {
         progress("Initializing Vision...")
-        guard let cgImage = image.cgImage else { 
+        guard let cgImage = image.cgImage else {
             return ([], "Failed to process image: Invalid image format")
         }
         
         let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         let request = VNRecognizeTextRequest()
         
-        // Configure the request for better accuracy
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
         request.minimumTextHeight = 0.01
@@ -33,26 +32,20 @@ class VisionStrategy: ImageProcessingStrategy {
             progress("Processing image with Vision...")
             try requestHandler.perform([request])
             
-            guard let observations = request.results else { 
+            guard let observations = request.results else {
                 return ([], "No text found in image")
             }
             
             progress("Extracting text from image...")
-            let items = observations.enumerated().compactMap { (index, observation) -> String? in
+            let items: [GroceryItemResult] = observations.enumerated().compactMap { (_, observation) in
                 guard let text = observation.topCandidates(1).first?.string else { return nil }
-                
-                // Clean up the text while preserving quantities and packaging
                 let cleanedText = cleanText(text)
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                     .trimmingCharacters(in: .whitespacesAndNewlines)
-                
-                // Skip empty or very short items
                 guard cleanedText.count > 1 else { return nil }
-                
-                return cleanedText
+                return GroceryItemResult(text: cleanedText, section: .other)
             }
-            
             return (items, nil)
         } catch {
             return ([], "Vision processing error: \(error.localizedDescription)")
