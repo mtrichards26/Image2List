@@ -2,6 +2,8 @@ import SwiftUI
 import PhotosUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+    
     @State private var selectedImage: UIImage?
     @State private var checklistItems: [ChecklistItem] = []
     @State private var isShowingCamera = false
@@ -126,15 +128,11 @@ struct ContentView: View {
                                             if let index = checklistItems.firstIndex(where: { $0.id == item.id }) {
                                                 checklistItems.remove(at: index)
                                             }
+                                        }, onBeginEdit: {
+                                            editingItem = item
+                                            editingText = item.text
+                                            isEditingFocused = true
                                         })
-                                        .simultaneousGesture(
-                                            LongPressGesture(minimumDuration: 0.5)
-                                                .onEnded { _ in
-                                                    editingItem = item
-                                                    editingText = item.text
-                                                    isEditingFocused = true
-                                                }
-                                        )
                                         .onDrag {
                                             draggedItem = item
                                             return NSItemProvider(object: item.id.uuidString as NSString)
@@ -288,12 +286,22 @@ struct ContentView: View {
                 for: .navigationBar
             )
             .toolbarBackground(.visible, for: .navigationBar)
-            .onChange(of: isScreenLockDisabled) { oldValue, newValue in
-                UIApplication.shared.isIdleTimerDisabled = newValue
+            .onChange(of: isScreenLockDisabled) { _, newValue in
+                applyIdleTimerPreference(enabled: newValue)
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // iOS can reset idle-timer suppression after backgrounding; reapply when active.
+                switch phase {
+                case .active:
+                    applyIdleTimerPreference(enabled: isScreenLockDisabled)
+                case .inactive, .background:
+                    UIApplication.shared.isIdleTimerDisabled = false
+                @unknown default:
+                    break
+                }
             }
             .onAppear {
-                // Apply screen lock setting when app launches
-                UIApplication.shared.isIdleTimerDisabled = isScreenLockDisabled
+                applyIdleTimerPreference(enabled: isScreenLockDisabled)
                 loadSavedState()
             }
             .sheet(isPresented: $isCameraPresented) {
@@ -356,6 +364,10 @@ struct ContentView: View {
                 deleteSavedImage()
             }
         }
+    }
+    
+    private func applyIdleTimerPreference(enabled: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = enabled
     }
     
     private func loadSavedState() {
