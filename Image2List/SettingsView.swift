@@ -2,12 +2,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var isPresented: Bool
-    @Binding var useOpenAI: Bool
     @Binding var openAIKey: String
     @Binding var keepScreenOn: Bool
     @Binding var extractionType: ExtractionType
     @Binding var googleApiKey: String
     @Binding var openaiModel: String
+    @Binding var geminiModel: String
     
     @State private var tempOpenAIKey: String = ""
     @State private var showingKeyAlert = false
@@ -36,6 +36,11 @@ struct SettingsView: View {
                         SecureField("Google API Key", text: $googleApiKey)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
+                        Picker("Model", selection: $geminiModel) {
+                            ForEach(GeminiConfig.availableModels, id: \.self) { model in
+                                Text(model).tag(model)
+                            }
+                        }
                     }
                 }
                 

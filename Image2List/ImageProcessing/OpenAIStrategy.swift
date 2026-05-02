@@ -7,12 +7,17 @@
 import SwiftUI
 import Vision
 
-// OpenAI Configuration
+// OpenAI Configuration — vision-capable chat models (validated against platform.openai.com/docs/models)
 struct OpenAIConfig {
-    static let apiKey = "YOUR_API_KEY"
-    static let endpoint = "https://api.openai.com/v1/chat/completions"
-    static let availableModels = ["gpt-4o-mini", "gpt-4o"]
-    static let defaultModel = "gpt-4o-mini"
+    static let availableModels = [
+        "gpt-4.1-mini",
+        "gpt-4o-mini",
+        "gpt-4o",
+        "gpt-5.4-nano",
+        "gpt-5.4-mini",
+        "gpt-5.4"
+    ]
+    static let defaultModel = "gpt-4.1-mini"
 }    
 
 class OpenAIStrategy: ImageProcessingStrategy {
@@ -26,7 +31,7 @@ class OpenAIStrategy: ImageProcessingStrategy {
         self.model = model
     }
     
-    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [String], error: String?) {
+    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [GroceryItemResult], error: String?) {
         progress("Preparing image for ChatGPT/OpenAI...")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             return ([], "Failed to convert image to JPEG format")
@@ -54,7 +59,7 @@ class OpenAIStrategy: ImageProcessingStrategy {
         let requestBody: [String: Any] = [
             "model": model,
             "messages": messages,
-            "max_tokens": 1000
+            "max_completion_tokens": 1000
         ]
         
         guard let url = URL(string: endpoint),
@@ -90,24 +95,21 @@ class OpenAIStrategy: ImageProcessingStrategy {
                let content = message["content"] as? String {
                 
                 progress("Processing OpenAI response...")
-                // Clean and parse the content
                 let cleanedContent = content
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .replacingOccurrences(of: "```json", with: "")
                     .replacingOccurrences(of: "```", with: "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                if let jsonData = cleanedContent.data(using: .utf8),
-                   let items = try? JSONDecoder().decode([String].self, from: jsonData) {
-                    return (items, nil)
-                } else {
-                    // If JSON parsing fails, try to parse as plain text
-                    let items = cleanedContent
-                        .components(separatedBy: .newlines)
-                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
+                if let items = parseGroceryItemsFromJSON(cleanedContent) {
                     return (items, nil)
                 }
+                let fallbackItems = cleanedContent
+                    .components(separatedBy: .newlines)
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
+                    .map { GroceryItemResult(text: $0, section: .other) }
+                return (fallbackItems, nil)
             }
             
             return ([], "Failed to parse OpenAI response")

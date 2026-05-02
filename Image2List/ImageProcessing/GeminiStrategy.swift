@@ -7,21 +7,34 @@
 import SwiftUI
 import Vision
 
+// Google Gemini Configuration — multimodal models (validated against ai.google.dev/gemini-api/docs/models)
+struct GeminiConfig {
+    static let baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
+    static let availableModels = [
+        "gemini-2.5-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-2.5-pro"
+    ]
+    static let defaultModel = "gemini-2.5-flash"
+}
+
 class GeminiStrategy: ImageProcessingStrategy {
     private let apiKey: String
-    private let endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent"
+    private let model: String
     
-    init(apiKey: String) {
+    init(apiKey: String, model: String = GeminiConfig.defaultModel) {
         self.apiKey = apiKey
+        self.model = model
     }
     
-    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [String], error: String?) {
+    func processImage(_ image: UIImage, progress: @escaping (String) -> Void) async -> (items: [GroceryItemResult], error: String?) {
         progress("Preparing image for Google Gemini...")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             return ([], "Failed to convert image to JPEG format")
         }
         let base64Image = imageData.base64EncodedString()
         
+        let endpoint = "\(GeminiConfig.baseURL)/\(model):generateContent"
         let requestBody: [String: Any] = [
             "contents": [
                 [
@@ -74,24 +87,21 @@ class GeminiStrategy: ImageProcessingStrategy {
                let text = firstPart["text"] as? String {
                 
                 progress("Processing Gemini response...")
-                // Clean and parse the content
                 let cleanedContent = text
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .replacingOccurrences(of: "```json", with: "")
                     .replacingOccurrences(of: "```", with: "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                if let jsonData = cleanedContent.data(using: .utf8),
-                   let items = try? JSONDecoder().decode([String].self, from: jsonData) {
-                    return (items, nil)
-                } else {
-                    // If JSON parsing fails, try to parse as plain text
-                    let items = cleanedContent
-                        .components(separatedBy: .newlines)
-                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
+                if let items = parseGroceryItemsFromJSON(cleanedContent) {
                     return (items, nil)
                 }
+                let fallbackItems = cleanedContent
+                    .components(separatedBy: .newlines)
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
+                    .map { GroceryItemResult(text: $0, section: .other) }
+                return (fallbackItems, nil)
             }
             
             return ([], "Failed to parse Gemini response")

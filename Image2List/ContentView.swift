@@ -2,6 +2,8 @@ import SwiftUI
 import PhotosUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+    
     @State private var selectedImage: UIImage?
     @State private var checklistItems: [ChecklistItem] = []
     @State private var isShowingCamera = false
@@ -14,22 +16,21 @@ struct ContentView: View {
     @State private var editingItem: ChecklistItem?
     @State private var editingText = ""
     @State private var isShowingSettings = false
-    @AppStorage("useOpenAI") private var useOpenAI = false
     @AppStorage("openAIKey") private var openAIKey = ""
     @AppStorage("keepScreenOn") private var isScreenLockDisabled = false
     @FocusState private var isEditingFocused: Bool
     @State private var isImagePickerPresented = false
     @State private var isCameraPresented = false
-    @State private var recognizedItems: [String] = []
     @State private var isProcessing = false
     @State private var processingMessage = ""
-    @AppStorage("openaiEndpoint") private var openaiEndpoint = ""
     @AppStorage("customWords") private var customWordsString = ""
     @AppStorage("openaiModel") private var openaiModel = OpenAIConfig.defaultModel
+    @AppStorage("geminiModel") private var geminiModel = GeminiConfig.defaultModel
     @AppStorage("extractionType") private var extractionType = ExtractionType.local
     @AppStorage("googleApiKey") private var googleApiKey = ""
     @State private var errorMessage: String?
     @State private var showingError = false
+    @State private var isShowingClearListConfirmation = false
     @AppStorage("savedChecklistItems") private var savedChecklistItemsData: Data = Data()
     
     private var customWords: [String] {
@@ -43,7 +44,7 @@ struct ContentView: View {
         case .openai:
             return OpenAIStrategy(apiKey: openAIKey, endpoint: "https://api.openai.com/v1/chat/completions", model: openaiModel)
         case .google:
-            return GeminiStrategy(apiKey: googleApiKey)
+            return GeminiStrategy(apiKey: googleApiKey, model: geminiModel)
         }
     }
     
@@ -127,15 +128,11 @@ struct ContentView: View {
                                             if let index = checklistItems.firstIndex(where: { $0.id == item.id }) {
                                                 checklistItems.remove(at: index)
                                             }
+                                        }, onBeginEdit: {
+                                            editingItem = item
+                                            editingText = item.text
+                                            isEditingFocused = true
                                         })
-                                        .simultaneousGesture(
-                                            LongPressGesture(minimumDuration: 0.5)
-                                                .onEnded { _ in
-                                                    editingItem = item
-                                                    editingText = item.text
-                                                    isEditingFocused = true
-                                                }
-                                        )
                                         .onDrag {
                                             draggedItem = item
                                             return NSItemProvider(object: item.id.uuidString as NSString)
@@ -230,16 +227,24 @@ struct ContentView: View {
                         
                         if selectedImage != nil {
                             Button(action: {
-                                withAnimation {
-                                    self.selectedImage = nil
-                                    checklistItems = []
-                                }
+                                isShowingClearListConfirmation = true
                             }) {
                                 Image(systemName: "trash")
                                     .font(.system(size: 24))
                                     .foregroundColor(Color(red: 0.7, green: 0.3, blue: 0.3))
                                     .padding(12)
                                     .background(Color(red: 0.7, green: 0.3, blue: 0.3).opacity(0.1))
+                            }
+                            .confirmationDialog("Clear List?", isPresented: $isShowingClearListConfirmation) {
+                                Button("Clear List", role: .destructive) {
+                                    withAnimation {
+                                        selectedImage = nil
+                                        checklistItems = []
+                                    }
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            } message: {
+                                Text("This will remove the photo and all list items. This cannot be undone.")
                             }
                         }
                     }
@@ -281,12 +286,22 @@ struct ContentView: View {
                 for: .navigationBar
             )
             .toolbarBackground(.visible, for: .navigationBar)
-            .onChange(of: isScreenLockDisabled) { oldValue, newValue in
-                UIApplication.shared.isIdleTimerDisabled = newValue
+            .onChange(of: isScreenLockDisabled) { _, newValue in
+                applyIdleTimerPreference(enabled: newValue)
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // iOS can reset idle-timer suppression after backgrounding; reapply when active.
+                switch phase {
+                case .active:
+                    applyIdleTimerPreference(enabled: isScreenLockDisabled)
+                case .inactive, .background:
+                    UIApplication.shared.isIdleTimerDisabled = false
+                @unknown default:
+                    break
+                }
             }
             .onAppear {
-                // Apply screen lock setting when app launches
-                UIApplication.shared.isIdleTimerDisabled = isScreenLockDisabled
+                applyIdleTimerPreference(enabled: isScreenLockDisabled)
                 loadSavedState()
             }
             .sheet(isPresented: $isCameraPresented) {
@@ -319,12 +334,12 @@ struct ContentView: View {
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView(
                     isPresented: $isShowingSettings,
-                    useOpenAI: $useOpenAI,
                     openAIKey: $openAIKey,
                     keepScreenOn: $isScreenLockDisabled,
                     extractionType: $extractionType,
                     googleApiKey: $googleApiKey,
-                    openaiModel: $openaiModel
+                    openaiModel: $openaiModel,
+                    geminiModel: $geminiModel
                 )
             }
             .alert("Error", isPresented: $showingError, presenting: errorMessage) { _ in
@@ -349,6 +364,10 @@ struct ContentView: View {
                 deleteSavedImage()
             }
         }
+    }
+    
+    private func applyIdleTimerPreference(enabled: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = enabled
     }
     
     private func loadSavedState() {
@@ -416,9 +435,10 @@ struct ContentView: View {
                 errorMessage = error
                 showingError = true
             } else {
-                checklistItems = result.items.enumerated().map { (index, text) in
-                    ChecklistItem(text: text, originalIndex: index)
+                checklistItems = result.items.enumerated().map { (index, item) in
+                    ChecklistItem(text: titleCasedForList(item.text), originalIndex: index, section: item.section)
                 }
+                checklistItems.sort()
             }
             isProcessing = false
         }
@@ -449,30 +469,5 @@ struct DropViewDelegate: DropDelegate {
     
     func dropUpdated(info: DropInfo) -> DropProposal? {
         return DropProposal(operation: .move)
-    }
-}
-
-
-// Add this extension to help with text field cursor positioning
-extension UITextField {
-    static var current: UITextField? {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            return windowScene.windows.first?.findFirstResponder() as? UITextField
-        }
-        return nil
-    }
-}
-
-extension UIView {
-    func findFirstResponder() -> UIView? {
-        if isFirstResponder {
-            return self
-        }
-        for subview in subviews {
-            if let firstResponder = subview.findFirstResponder() {
-                return firstResponder
-            }
-        }
-        return nil
     }
 }
