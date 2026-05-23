@@ -37,6 +37,10 @@ struct ContentView: View {
         customWordsString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
     }
     
+    private var uncheckedItemCount: Int {
+        checklistItems.filter { !$0.isChecked }.count
+    }
+    
     private var imageProcessor: ImageProcessingStrategy {
         switch extractionType {
         case .local:
@@ -225,7 +229,7 @@ struct ContentView: View {
                             Button("Cancel", role: .cancel) {}
                         }
                         
-                        if selectedImage != nil {
+                        if !checklistItems.isEmpty {
                             Button(action: {
                                 isShowingClearListConfirmation = true
                             }) {
@@ -244,11 +248,22 @@ struct ContentView: View {
                                 }
                                 Button("Cancel", role: .cancel) {}
                             } message: {
-                                Text("This will remove the photo and all list items. This cannot be undone.")
+                                if selectedImage != nil {
+                                    Text("This will remove the photo and all list items. This cannot be undone.")
+                                } else {
+                                    Text("This will remove all list items. This cannot be undone.")
+                                }
                             }
                         }
                     }
                     .padding()
+                    
+                    if !checklistItems.isEmpty {
+                        Text("Remaining: \(uncheckedItemCount)")
+                            .font(.subheadline)
+                            .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.5))
+                            .padding(.bottom, 8)
+                    }
                 }
                 
                 if isProcessing {
@@ -270,8 +285,9 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         Text("GrocerySnap")
+                            .fontWeight(.bold)
                         if isScreenLockDisabled {
                             Circle()
                                 .fill(Color.white)
